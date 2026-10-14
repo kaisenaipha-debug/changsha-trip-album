@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>长沙四日游 · 私人旅行管家 · 行程画册</title>
+<style>
+:root{
+  --navy:#07111f; --navy-2:#0e2036; --gold:#d8ad4e; --gold-2:#f0d68f;
+  --ink:#f3efe7; --muted:#8ea0b8; --line:rgba(216,173,78,.22);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{
+  background:radial-gradient(1100px 620px at 50% -8%,#173252 0%,transparent 62%),var(--navy);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+
+/* ---------- 顶栏 ---------- */
+header{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 20px calc(10px + env(safe-area-inset-top,0)) 20px;
+  padding-top:calc(14px + env(safe-area-inset-top,0));
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(7,17,31,.92),rgba(7,17,31,.55));
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  position:relative;z-index:20;flex:0 0 auto;
+}
+.brand{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.brand b{
+  font-size:17px;letter-spacing:.16em;font-weight:600;
+  background:linear-gradient(92deg,var(--gold-2),var(--gold));
+  -webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap;
+}
+.brand span{font-size:10.5px;color:var(--muted);letter-spacing:.3em;margin-top:2px}
+.spacer{flex:1}
+.tools{display:flex;gap:8px;align-items:center}
+.tbtn{
+  border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--ink);
+  height:34px;min-width:34px;padding:0 12px;border-radius:999px;cursor:pointer;
+  font-size:12.5px;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  transition:.22s;font-family:inherit;white-space:nowrap;
+}
+.tbtn:hover{background:rgba(216,173,78,.14);border-color:rgba(216,173,78,.5)}
+.tbtn.on{background:rgba(216,173,78,.2);border-color:var(--gold);color:var(--gold-2)}
+.tbtn svg{width:15px;height:15px;flex:0 0 auto}
+
+/* 音乐跳动条 */
+.eq{display:none;align-items:flex-end;gap:2px;height:12px}
+.eq.on{display:inline-flex}
+.eq i{width:2.5px;background:var(--gold-2);border-radius:1px;animation:eq .9s ease-in-out infinite}
+.eq i:nth-child(1){height:40%;animation-delay:0s}
+.eq i:nth-child(2){height:85%;animation-delay:.16s}
+.eq i:nth-child(3){height:55%;animation-delay:.32s}
+@keyframes eq{0%,100%{transform:scaleY(.42)}50%{transform:scaleY(1)}}
+
+/* ---------- 舞台 ---------- */
+main{flex:1 1 auto;position:relative;display:flex;align-items:center;justify-content:center;min-height:0;padding:14px}
+.stage{position:relative;height:100%;width:100%;display:flex;align-items:center;justify-content:center}
+.shot{
+  max-height:100%;max-width:100%;
+  border-radius:14px;
+  box-shadow:0 26px 70px -18px rgba(0,0,0,.92),0 0 0 1px rgba(216,173,78,.16);
+  opacity:0;transform:translateY(10px) scale(.988);
+  transition:opacity .42s ease,transform .42s cubic-bezier(.2,.7,.3,1);
+  will-change:opacity,transform;display:block;
+}
+.shot.in{opacity:1;transform:none}
+
+.nav{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:48px;height:48px;border-radius:50%;cursor:pointer;
+  border:1px solid var(--line);background:rgba(7,17,31,.6);color:var(--ink);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;transition:.22s;z-index:12;
+}
+.nav:hover{background:rgba(216,173,78,.2);border-color:var(--gold);color:var(--gold-2)}
+.nav.prev{left:8px}.nav.next{right:8px}
+.nav[disabled]{opacity:.22;cursor:default;pointer-events:none}
+.nav svg{width:20px;height:20px}
+
+.counter{
+  position:absolute;left:50%;bottom:6px;transform:translateX(-50%);
+  font-size:11.5px;letter-spacing:.22em;color:var(--muted);
+  background:rgba(7,17,31,.72);border:1px solid var(--line);
+  padding:5px 14px;border-radius:999px;z-index:12;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.counter b{color:var(--gold-2);font-weight:600}
+
+/* 进度条 */
+.bar{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.06);z-index:11}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-2));transition:width .4s ease}
+
+/* ---------- 缩略图 ---------- */
+footer{
+  flex:0 0 auto;border-top:1px solid var(--line);
+  background:linear-gradient(0deg,rgba(7,17,31,.94),rgba(7,17,31,.5));
+  padding-bottom:env(safe-area-inset-bottom,0);z-index:20;
+}
+.strip{
+  display:flex;gap:8px;overflow-x:auto;padding:11px 14px;scroll-behavior:smooth;
+  scrollbar-width:thin;scrollbar-color:rgba(216,173,78,.4) transparent;
+}
+.strip::-webkit-scrollbar{height:4px}
+.strip::-webkit-scrollbar-thumb{background:rgba(216,173,78,.4);border-radius:2px}
+.th{
+  width:44px;height:59px;flex:0 0 auto;border-radius:6px;overflow:hidden;cursor:pointer;
+  border:1px solid rgba(255,255,255,.12);opacity:.5;transition:.22s;background:#0b1a2c;
+  padding:0;
+}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.th:hover{opacity:.85}
+.th.cur{opacity:1;border-color:var(--gold);box-shadow:0 0 0 2px rgba(216,173,78,.28);transform:translateY(-2px)}
+
+/* ---------- 开场遮罩 ---------- */
+.veil{
+  position:fixed;inset:0;z-index:99;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:26px;text-align:center;padding:24px;
+  background:radial-gradient(900px 600px at 50% 20%,#16304f 0%,#06101d 68%);
+  transition:opacity .6s ease,visibility .6s;
+}
+.veil.gone{opacity:0;visibility:hidden}
+.veil h1{
+  margin:0;font-size:clamp(26px,7vw,44px);letter-spacing:.3em;font-weight:600;
+  background:linear-gradient(96deg,var(--gold-2),var(--gold) 55%,#b98f34);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.veil p{margin:0;color:var(--muted);font-size:12.5px;letter-spacing:.34em}
+.veil .rule{width:64px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.veil .cnt{font-size:12px;color:#6f8098;letter-spacing:.14em}
+.veil .btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.enter{
+  border:1px solid rgba(216,173,78,.5);background:rgba(216,173,78,.12);color:var(--gold-2);
+  padding:12px 26px;border-radius:999px;font-size:13.5px;letter-spacing:.16em;cursor:pointer;
+  transition:.24s;font-family:inherit;
+}
+.enter:hover{background:rgba(216,173,78,.24);box-shadow:0 0 30px -6px rgba(216,173,78,.5)}
+.enter.ghost{border-color:rgba(255,255,255,.2);color:var(--ink);background:transparent;letter-spacing:.12em}
+.enter.ghost:hover{background:rgba(255,255,255,.08);box-shadow:none}
+
+/* 提示 */
+.hint{
+  position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  font-size:11.5px;color:var(--muted);background:rgba(7,17,31,.8);border:1px solid var(--line);
+  padding:7px 16px;border-radius:999px;opacity:0;transition:opacity .5s;pointer-events:none;z-index:30;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);white-space:nowrap;
+}
+.hint.show{opacity:1}
+
+@media (max-width:720px){
+  header{padding:12px 14px calc(9px + env(safe-area-inset-top,0))}
+  .brand b{font-size:14.5px;letter-spacing:.1em}
+  .brand span{font-size:9px;letter-spacing:.2em}
+  .tbtn{padding:0 10px;height:32px;font-size:11.5px}
+  .nav{width:38px;height:38px}
+  .nav.prev{left:2px}.nav.next{right:2px}
+  main{padding:8px}
+  .th{width:38px;height:51px}
+  .counter{bottom:2px;font-size:10.5px}
+}
+@media (max-height:520px){footer{display:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <b>长沙四日游</b>
+    <span>私人旅行管家 · 行程画册</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="tools">
+    <button class="tbtn" id="btnMusic" title="背景音乐">
+      <span class="eq" id="eq"><i></i><i></i><i></i></span>
+      <span id="musicLabel">音乐</span>
+    </button>
+    <button class="tbtn" id="btnAuto" title="自动播放">▶ 自动</button>
+    <button class="tbtn" id="btnFull" title="全屏">⛶</button>
+  </div>
+</header>
+
+<main>
+  <div class="stage" id="stage">
+    <img class="shot" id="shot" alt="">
+    <button class="nav prev" id="prev" aria-label="上一页">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <button class="nav next" id="next" aria-label="下一页">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+    <div class="counter"><b id="cur">1</b> / <span id="tot">18</span></div>
+    <div class="bar"><i id="barFill"></i></div>
+  </div>
+</main>
+
+<footer>
+  <div class="strip" id="strip"></div>
+</footer>
+
+<audio id="bgm" src="audio/bgm.mp3" loop preload="none"></audio>
+
+<div class="veil" id="veil">
+  <h1>长 沙 四 日 游</h1>
+  <div class="rule"></div>
+  <p>私人旅行管家 · 行程画册</p>
+  <div class="cnt">共 <span id="veilTot">18</span> 页 · 山水洲城 · 人文长沙</div>
+  <div class="btns">
+    <button class="enter" id="enterMusic">🎵 带音乐进入</button>
+    <button class="enter ghost" id="enterSilent">静音浏览</button>
+  </div>
+</div>
+
+<div class="hint" id="hint">← → 翻页 · 空格自动播放 · 点击下方缩略图跳转</div>
+
+<script>
+(function(){
+  "use strict";
+  /* 页码 => 文件（源手册共 21 页，缺封面 / 第13页 / 第19页） */
+  var PAGES = [1,2,3,4,5,6,7,8,9,10,11,12,14,15,16,17,18,20].map(function(n){
+    return {file:'img/p'+String(n).padStart(2,'0')+'.webp', page:n};
+  });
+
+  var idx = 0, auto = false, autoTimer = null, AUTO_MS = 7000;
+  var shot = document.getElementById('shot');
+  var strip = document.getElementById('strip');
+  var veil = document.getElementById('veil');
+  var bgm = document.getElementById('bgm');
+  var eq = document.getElementById('eq');
+  var musicLabel = document.getElementById('musicLabel');
+  var hint = document.getElementById('hint');
+
+  document.getElementById('tot').textContent = PAGES.length;
+  document.getElementById('veilTot').textContent = PAGES.length;
+
+  /* 缩略图 */
+  PAGES.forEach(function(p, i){
+    var b = document.createElement('button');
+    b.className = 'th' + (i === 0 ? ' cur' : '');
+    b.title = p.page + ' 页';
+    var im = document.createElement('img');
+    im.src = p.file; im.loading = 'lazy'; im.alt = p.page + ' 页';
+    b.appendChild(im);
+    b.addEventListener('click', function(){ go(i); });
+    strip.appendChild(b);
+  });
+  var ths = Array.prototype.slice.call(strip.children);
+
+  /* 预加载相邻页 */
+  function preload(i){
+    [i+1, i+2, i-1].forEach(function(n){
+      if (n >= 0 && n < PAGES.length) { var im = new Image(); im.src = PAGES[n].file; }
+    });
+  }
+
+  function go(i){
+    if (i < 0 || i >= PAGES.length) return;
+    idx = i;
+    var p = PAGES[i];
+    shot.classList.remove('in');
+    var nxt = new Image();
+    nxt.onload = function(){
+      shot.src = p.file;
+      shot.alt = '第 ' + p.page + ' 页';
+      requestAnimationFrame(function(){ shot.classList.add('in'); });
+    };
+    nxt.src = p.file;
+
+    document.getElementById('cur').textContent = i + 1;
+    document.getElementById('barFill').style.width = ((i + 1) / PAGES.length * 100) + '%';
+    document.getElementById('prev').disabled = (i === 0);
+    document.getElementById('next').disabled = (i === PAGES.length - 1);
+
+    ths.forEach(function(t, k){ t.classList.toggle('cur', k === i); });
+    if (ths[i]) {
+      var s = ths[i];
+      strip.scrollTo({left: s.offsetLeft - strip.clientWidth / 2 + s.clientWidth / 2, behavior: 'smooth'});
+    }
+    preload(i);
+    if (auto) resetAuto();
+  }
+
+  function resetAuto(){
+    clearTimeout(autoTimer);
+    autoTimer = setTimeout(function(){
+      if (idx < PAGES.length - 1) go(idx + 1);
+      else { setAuto(false); }
+    }, AUTO_MS);
+  }
+
+  function setAuto(on){
+    auto = on;
+    var b = document.getElementById('btnAuto');
+    b.classList.toggle('on', on);
+    b.textContent = on ? '❚❚ 暂停' : '▶ 自动';
+    if (on) resetAuto(); else clearTimeout(autoTimer);
+  }
+
+  /* 音乐 */
+  function music(on){
+    if (on) {
+      bgm.volume = 0;
+      var p = bgm.play();
+      if (p && p.catch) p.catch(function(){});
+      var v = 0, t = setInterval(function(){
+        v += 0.05;
+        if (v >= 0.55) { v = 0.55; clearInterval(t); }
+        bgm.volume = v;
+      }, 120);
+      eq.classList.add('on'); musicLabel.textContent = '音乐';
+      document.getElementById('btnMusic').classList.add('on');
+    } else {
+      bgm.pause();
+      eq.classList.remove('on');
+      document.getElementById('btnMusic').classList.remove('on');
+    }
+  }
+
+  /* 事件 */
+  document.getElementById('prev').addEventListener('click', function(){ go(idx - 1); });
+  document.getElementById('next').addEventListener('click', function(){ go(idx + 1); });
+  document.getElementById('btnAuto').addEventListener('click', function(){ setAuto(!auto); });
+  document.getElementById('btnMusic').addEventListener('click', function(){ music(bgm.paused); });
+  document.getElementById('btnFull').addEventListener('click', function(){
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+    else document.exitFullscreen && document.exitFullscreen();
+  });
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowLeft') { go(idx - 1); }
+    else if (e.key === 'ArrowRight') { go(idx + 1); }
+    else if (e.key === ' ') { e.preventDefault(); setAuto(!auto); }
+    else if (e.key === 'm' || e.key === 'M') { music(bgm.paused); }
+    else if (e.key === 'Escape' && document.fullscreenElement) { document.exitFullscreen(); }
+  });
+
+  /* 触摸滑动 */
+  var x0 = null, y0 = null;
+  var stage = document.getElementById('stage');
+  stage.addEventListener('touchstart', function(e){
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+  }, {passive: true});
+  stage.addEventListener('touchend', function(e){
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    var dy = e.changedTouches[0].clientY - y0;
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) { go(dx < 0 ? idx + 1 : idx - 1); }
+    x0 = null; y0 = null;
+  }, {passive: true});
+
+  /* 滚轮翻页（节流） */
+  var lock = false;
+  window.addEventListener('wheel', function(e){
+    if (lock) return;
+    if (Math.abs(e.deltaY) < 24) return;
+    lock = true; setTimeout(function(){ lock = false; }, 620);
+    go(e.deltaY > 0 ? idx + 1 : idx - 1);
+  }, {passive: true});
+
+  /* 进入 */
+  function enter(withMusic){
+    veil.classList.add('gone');
+    if (withMusic) music(true);
+    setTimeout(function(){ hint.classList.add('show'); }, 500);
+    setTimeout(function(){ hint.classList.remove('show'); }, 6500);
+  }
+  document.getElementById('enterMusic').addEventListener('click', function(){ enter(true); });
+  document.getElementById('enterSilent').addEventListener('click', function(){ enter(false); });
+
+  go(0);
+  setTimeout(function(){ shot.classList.add('in'); }, 60);
+})();
+</script>
+</body>
+</html>
