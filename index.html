@@ -163,6 +163,52 @@ footer{
   .counter{bottom:2px;font-size:10.5px}
 }
 @media (max-height:520px){footer{display:none}}
+
+/* ---------- 选歌面板 ---------- */
+.sheet{
+  position:fixed;z-index:60;right:16px;top:64px;width:min(340px,calc(100vw - 32px));
+  max-height:min(62vh,520px);display:flex;flex-direction:column;overflow:hidden;
+  border-radius:16px;border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(14,32,54,.97),rgba(7,17,31,.98));
+  box-shadow:0 30px 70px -18px rgba(0,0,0,.9),0 0 0 1px rgba(216,173,78,.1);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  opacity:0;visibility:hidden;transform:translateY(-10px) scale(.98);
+  transition:opacity .24s ease,transform .24s cubic-bezier(.2,.7,.3,1),visibility .24s;
+}
+.sheet.open{opacity:1;visibility:visible;transform:none}
+.sheet header{
+  all:unset;display:flex;align-items:center;gap:8px;padding:13px 15px 11px;
+  border-bottom:1px solid var(--line);font-size:12px;letter-spacing:.14em;color:var(--gold-2);
+}
+.sheet header .cnt2{margin-left:auto;font-size:10.5px;color:var(--muted);letter-spacing:.06em}
+.slist{overflow-y:auto;padding:6px 6px 10px;
+  scrollbar-width:thin;scrollbar-color:rgba(216,173,78,.35) transparent}
+.slist::-webkit-scrollbar{width:5px}
+.slist::-webkit-scrollbar-thumb{background:rgba(216,173,78,.35);border-radius:3px}
+.song{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;
+  padding:9px 11px;border-radius:9px;border:1px solid transparent;background:transparent;
+  color:var(--ink);font-family:inherit;font-size:13px;transition:.16s;
+}
+.song:hover{background:rgba(216,173,78,.1)}
+.song .em{font-size:14px;width:18px;text-align:center;flex:0 0 auto}
+.song .meta{min-width:0;flex:1}
+.song .nm{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.song .ar{display:block;font-size:10.5px;color:var(--muted);margin-top:1px}
+.song .dr{font-size:10.5px;color:#63748d;flex:0 0 auto;font-variant-numeric:tabular-nums}
+.song.cur{background:rgba(216,173,78,.16);border-color:rgba(216,173,78,.45);
+  box-shadow:inset 3px 0 0 0 var(--gold)}
+.song.cur .nm{color:var(--gold-2);font-weight:600}
+#musicLabel{
+  max-width:5.6em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  display:inline-block;vertical-align:middle;
+}
+.song .plying{display:none;font-size:10px;color:var(--gold-2)}
+.song.cur .plying{display:inline}
+@media (max-width:720px){
+  .sheet{left:10px;right:10px;top:auto;bottom:calc(96px + env(safe-area-inset-bottom,0px));
+    width:auto;max-height:56vh;border-radius:14px}
+}
 </style>
 </head>
 <body>
@@ -174,10 +220,11 @@ footer{
   </div>
   <div class="spacer"></div>
   <div class="tools">
-    <button class="tbtn" id="btnMusic" title="背景音乐">
+    <button class="tbtn" id="btnMusic" title="播放/暂停背景音乐">
       <span class="eq" id="eq"><i></i><i></i><i></i></span>
       <span id="musicLabel">音乐</span>
     </button>
+    <button class="tbtn" id="btnSongs" title="选择背景音乐">🎵 选歌</button>
     <button class="tbtn" id="btnAuto" title="自动播放">▶ 自动</button>
     <button class="tbtn" id="btnFull" title="全屏">⛶</button>
   </div>
@@ -201,7 +248,12 @@ footer{
   <div class="strip" id="strip"></div>
 </footer>
 
-<audio id="bgm" src="audio/bgm.mp3" loop preload="none"></audio>
+<audio id="bgm" loop preload="none"></audio>
+
+<div class="sheet" id="sheet">
+  <header>选择背景音乐<span class="cnt2" id="songCnt"></span></header>
+  <div class="slist" id="slist"></div>
+</div>
 
 <div class="veil" id="veil">
   <h1>长 沙 四 日 游</h1>
@@ -299,7 +351,7 @@ footer{
     if (on) resetAuto(); else clearTimeout(autoTimer);
   }
 
-  /* 音乐 */
+  /* ---------- 背景音乐（播放/暂停） ---------- */
   function music(on){
     if (on) {
       bgm.volume = 0;
@@ -310,7 +362,7 @@ footer{
         if (v >= 0.55) { v = 0.55; clearInterval(t); }
         bgm.volume = v;
       }, 120);
-      eq.classList.add('on'); musicLabel.textContent = '音乐';
+      eq.classList.add('on');
       document.getElementById('btnMusic').classList.add('on');
     } else {
       bgm.pause();
@@ -319,7 +371,75 @@ footer{
     }
   }
 
+  /* ---------- 曲库 + 选歌面板 ---------- */
+  var SONGS = [
+    {emoji:"🌿",name:"青花",artist:"周传雄",src:"audio/songs/s03.mp3",dur:290},
+    {emoji:"🌅",name:"黄昏",artist:"周传雄",src:"audio/songs/s05.mp3",dur:315},
+    {emoji:"🫘",name:"红豆",artist:"王菲",src:"audio/songs/s08.mp3",dur:253},
+    {emoji:"🌊",name:"漂洋过海来看你",artist:"刘明湘",src:"audio/songs/s09.mp3",dur:292},
+    {emoji:"🙏",name:"信仰",artist:"张信哲",src:"audio/songs/s10.mp3",dur:235},
+    {emoji:"🦅",name:"海阔天空",artist:"邓紫棋",src:"audio/songs/s16.mp3",dur:263}
+  ];
+  var sheet = document.getElementById('sheet');
+  var curSong = 0;
+
+  function fmt(sec){
+    var m = Math.floor(sec / 60), s = sec % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function markCur(){
+    var els = document.querySelectorAll('.song');
+    for (var i = 0; i < els.length; i++) els[i].classList.toggle('cur', i === curSong);
+  }
+
+  function loadSong(i, keepPlaying){
+    if (!SONGS.length || i < 0 || i >= SONGS.length) return;
+    var wasPlaying = (keepPlaying === undefined) ? !bgm.paused : keepPlaying;
+    curSong = i;
+    bgm.pause();
+    bgm.src = SONGS[i].src;
+    bgm.load();
+    try { localStorage.setItem('cs_album_song', String(i)); } catch (e) {}
+    musicLabel.textContent = SONGS[i].name;
+    markCur();
+    if (wasPlaying) music(true);
+  }
+
+  function buildSheet(){
+    var box = document.getElementById('slist');
+    SONGS.forEach(function(s, i){
+      var b = document.createElement('button');
+      b.className = 'song';
+      var em = document.createElement('span'); em.className = 'em'; em.textContent = s.emoji || '♪';
+      var meta = document.createElement('span'); meta.className = 'meta';
+      var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = s.name;
+      var pl = document.createElement('span'); pl.className = 'plying'; pl.textContent = ' ♪ 播放中';
+      nm.appendChild(pl);
+      var ar = document.createElement('span'); ar.className = 'ar'; ar.textContent = s.artist;
+      meta.appendChild(nm); meta.appendChild(ar);
+      var dr = document.createElement('span'); dr.className = 'dr'; dr.textContent = fmt(s.dur || 0);
+      b.appendChild(em); b.appendChild(meta); b.appendChild(dr);
+      b.addEventListener('click', function(){ loadSong(i, true); closeSheet(); });
+      box.appendChild(b);
+    });
+    document.getElementById('songCnt').textContent = SONGS.length + ' 首';
+  }
+
+  function openSheet(){ sheet.classList.add('open'); }
+  function closeSheet(){ sheet.classList.remove('open'); }
+  function toggleSheet(){ sheet.classList.toggle('open'); }
+
   /* 事件 */
+  document.getElementById('btnSongs').addEventListener('click', function(e){
+    e.stopPropagation(); toggleSheet();
+  });
+  document.addEventListener('click', function(e){
+    if (!sheet.classList.contains('open')) return;
+    if (sheet.contains(e.target)) return;
+    if (e.target.id === 'btnSongs') return;
+    closeSheet();
+  });
   document.getElementById('prev').addEventListener('click', function(){ go(idx - 1); });
   document.getElementById('next').addEventListener('click', function(){ go(idx + 1); });
   document.getElementById('btnAuto').addEventListener('click', function(){ setAuto(!auto); });
@@ -369,6 +489,14 @@ footer{
   }
   document.getElementById('enterMusic').addEventListener('click', function(){ enter(true); });
   document.getElementById('enterSilent').addEventListener('click', function(){ enter(false); });
+
+  buildSheet();
+  var defIdx = 0;
+  for (var k = 0; k < SONGS.length; k++) { if (SONGS[k].name === '海阔天空') defIdx = k; }
+  var savedIdx = -1;
+  try { savedIdx = parseInt(localStorage.getItem('cs_album_song'), 10); } catch (e) {}
+  if (isNaN(savedIdx)) savedIdx = -1;
+  loadSong((savedIdx >= 0 && savedIdx < SONGS.length) ? savedIdx : defIdx, false);
 
   go(0);
   setTimeout(function(){ shot.classList.add('in'); }, 60);

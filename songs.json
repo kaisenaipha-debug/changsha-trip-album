@@ -1,0 +1,50 @@
+[
+ {
+  "num": 3,
+  "emoji": "🌿",
+  "name": "青花",
+  "artist": "周传雄",
+  "src": "audio/songs/s03.mp3",
+  "dur": 290
+ },
+ {
+  "num": 5,
+  "emoji": "🌅",
+  "name": "黄昏",
+  "artist": "周传雄",
+  "src": "audio/songs/s05.mp3",
+  "dur": 315
+ },
+ {
+  "num": 8,
+  "emoji": "🫘",
+  "name": "红豆",
+  "artist": "王菲",
+  "src": "audio/songs/s08.mp3",
+  "dur": 253
+ },
+ {
+  "num": 9,
+  "emoji": "🌊",
+  "name": "漂洋过海来看你",
+  "artist": "刘明湘",
+  "src": "audio/songs/s09.mp3",
+  "dur": 292
+ },
+ {
+  "num": 10,
+  "emoji": "🙏",
+  "name": "信仰",
+  "artist": "张信哲",
+  "src": "audio/songs/s10.mp3",
+  "dur": 235
+ },
+ {
+  "num": 16,
+  "emoji": "🦅",
+  "name": "海阔天空",
+  "artist": "邓紫棋",
+  "src": "audio/songs/s16.mp3",
+  "dur": 263
+ }
+]
